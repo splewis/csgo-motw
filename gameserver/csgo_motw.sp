@@ -1,6 +1,6 @@
 #include <cstrike>
 #include <sourcemod>
-#include "SteamWorks.inc"
+#include <SteamWorks>
 
 #pragma semicolon 1
 #pragma newdecls required
