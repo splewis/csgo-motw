@@ -1,0 +1,35 @@
+sudo: false
+
+addons:
+    apt_packages:
+        - lib32stdc++6  # needed for spcomp
+
+before_script:
+    # install the google app engine sdk
+    - wget google_appengine_1.9.26.zip
+    - unzip google_appengine_1.9.26.zip
+    - PATH+=":$PWD/google_appengine"
+
+    # install smbuilder
+    - git clone https://github.com/splewis/sm-builder
+    - cd sm-builder
+    - pip install --user -r requirements.txt
+    - python setup.py install --prefix=~/.local
+    - cd ..
+
+    # install the sourcemod compiler
+    - wget http://www.gsptalk.com/mirror/sourcemod/sourcemod-1.7.2-linux.tar.gz
+    - tar -xzf sourcemod-1.7.2-linux.tar.gz
+    - cd addons/sourcemod/scripting/
+    - chmod +x spcomp
+    - PATH+=":$PWD"
+    - cd include
+    - wget https://raw.githubusercontent.com/KyleSanderson/SteamWorks/master/Pawn/includes/SteamWorks.inc
+    - cd ../../../..
+
+script:
+    - cd gameserver
+    - smbuilder --flags="-E"
+
+notifications:
+    email: false
