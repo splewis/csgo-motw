@@ -1,0 +1,14 @@
+application: csgo-motw
+runtime: python27
+version: 1
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /
+  script: motw.app
+
+- url: /data
+  static_files: data.json
+  upload: data.json
+  application_readable: true
