@@ -69,7 +69,12 @@ def get_motw(map_data, timestamp, league=DEFAULT_LEAGUE,
         # No matching timestamp.
         if index < 0 or index >= len(map_data[league]):
             return default_map
-        return map_data[league][index].name
+        map_result = map_data[league][index]
+        dt = timestamp - map_result.time
+        if dt > expiration:
+            return default_map
+        else:
+            return map_data[league][index].name
     except KeyError:
         return default_map
 
@@ -84,8 +89,12 @@ class MainHandler(webapp2.RequestHandler):
             timestamp = int(time.time())
 
         league = self.request.get('league', DEFAULT_LEAGUE)
-        expiration = self.request.get('expiration', DEFAULT_EXPIRATION)
         default_map = self.request.get('default', DEFAULT_MAP)
+
+        try:
+            expiration = int(self.request.get('expiration', DEFAULT_EXPIRATION))
+        except ValueError:
+            expiration = DEFAULT_EXPIRATION
 
         try:
             time_offset = self.request.get('offset', 0)
