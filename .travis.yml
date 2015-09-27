@@ -33,6 +33,7 @@ script:
     - smbuilder --flags="-E"
     - cd ../webserver
     - jsonlint -v data.json
+    - python motw_test.py
 
 notifications:
     email: false
