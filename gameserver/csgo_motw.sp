@@ -36,11 +36,7 @@ public void OnPluginStart() {
     g_OffsetCvar = CreateConVar("sm_csgo_motw_offset", "0", "Offset in seconds added to the timestamp");
     AutoExecConfig();
 
-    HookConVarChange(g_ApiUrlCvar, OnAPIChange);
-    HookConVarChange(g_DefaultCvar, OnAPIChange);
-    HookConVarChange(g_ExpirationCvar, OnAPIChange);
-    HookConVarChange(g_LeagueCvar, OnAPIChange);
-    HookConVarChange(g_OffsetCvar, OnAPIChange);
+    RegAdminCmd("sm_reloadmotw", Command_ReloadMOTW, ADMFLAG_CHANGEMAP, "Reloads the current MOTW");
 
     // Read the initial map from the datafile.
     if (!ReadMapFromDatafile()) {
@@ -61,16 +57,8 @@ public bool ReadMapFromDatafile() {
     return false;
 }
 
-public int OnAPIChange(Handle cvar, const char[] oldValue, const char[] newValue) {
-    UpdateCurrentMap();
-}
-
 public void OnConfigsExecuted() {
     UpdateCurrentMap();
-    CheckMapChange();
-    if (IsMapValid(g_CurrentMOTW)) {
-        SetNextMap(g_CurrentMOTW);
-    }
 }
 
 public void CheckMapChange() {
@@ -91,7 +79,7 @@ public Action Timer_ChangeMap(Handle timer) {
     }
 }
 
-public void UpdateCurrentMap() {
+static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REPLY_TO_CONSOLE) {
     char url[128];
     g_ApiUrlCvar.GetString(url, sizeof(url));
 
@@ -114,7 +102,9 @@ public void UpdateCurrentMap() {
             return;
         }
 
+        LogMessage("sending api request");
         SteamWorks_SetHTTPCallbacks(request, OnMapRecievedFromAPI);
+        SteamWorks_SetHTTPRequestContextValue(request, replyToSerial, replySource);
         SteamWorks_SetHTTPRequestGetOrPostParameter(request, "default", default_map);
         SteamWorks_SetHTTPRequestGetOrPostParameter(request, "expiration", expiration);
         SteamWorks_SetHTTPRequestGetOrPostParameter(request, "league", league);
@@ -127,17 +117,41 @@ public void UpdateCurrentMap() {
 }
 
 // SteamWorks HTTP callback for fetching a workshop collection
-public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSuccessful, EHTTPStatusCode statusCode) {
+public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSuccessful, EHTTPStatusCode statusCode, int serial, ReplySource replySource) {
+    LogMessage("got api response");
     if (failure || !requestSuccessful) {
         LogError("API request failed, HTTP status code = %d", statusCode);
+        CheckMapChange();
         return;
     }
 
     SteamWorks_WriteHTTPResponseBodyToFile(request, g_DataFile);
-    ReadMapFromDatafile();
 
-    LogMessage("got map %s", g_CurrentMOTW);
-    if (IsMapValid(g_CurrentMOTW)) {
-        CheckMapChange();
+    if (statusCode == k_EHTTPStatusCode200OK) {
+        ReadMapFromDatafile();
+        if (serial != 0) {
+            int client = GetClientOfUserId(serial);
+            // Save original reply source to restore later.
+            ReplySource r = GetCmdReplySource();
+            SetCmdReplySource(replySource);
+            ReplyToCommand(client, "Got new MOTW: %s", g_CurrentMOTW);
+            SetCmdReplySource(r);
+        }
+        LogMessage("got map %s", g_CurrentMOTW);
+    } else if (statusCode == k_EHTTPStatusCode400BadRequest) {
+        char errMsg[1024];
+        File f = OpenFile(g_DataFile, "r");
+        if (f != null) {
+            f.ReadLine(errMsg, sizeof(errMsg));
+            delete f;
+            LogError("Error message: %s", errMsg);
+        }
+        g_DefaultCvar.GetString(g_CurrentMOTW, sizeof(g_CurrentMOTW));
     }
+
+    CheckMapChange();
+}
+
+public Action Command_ReloadMOTW(int client, int args) {
+    UpdateCurrentMap(client, GetCmdReplySource());
 }

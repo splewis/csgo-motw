@@ -15,23 +15,29 @@ class MainHandler(webapp2.RequestHandler):
 
     def get(self):
         # Get URL params.
-        try:
-            timestamp = int(self.request.get('timestamp', time.time()))
-        except ValueError:
-            timestamp = int(time.time())
-
         league = self.request.get('league', motw.DEFAULT_LEAGUE)
         default_map = self.request.get('default', motw.DEFAULT_MAP)
 
         try:
+            timestamp = int(self.request.get('timestamp', time.time()))
+        except ValueError:
+            self.error(400)
+            self.response.write('Illegal value for parameter \"timestamp\"')
+            return
+
+        try:
             expiration = int(self.request.get('expiration', motw.DEFAULT_EXPIRATION))
         except ValueError:
-            expiration = motw.DEFAULT_EXPIRATION
+            self.error(400)
+            self.response.write('Illegal value for parameter \"expiration\"')
+            return
 
         try:
             time_offset = int(self.request.get('offset', 0))
         except ValueError:
-            time_offset = 0
+            self.error(400)
+            self.response.write('Illegal value for parameter \"offset\"')
+            return
 
         result_map = motw.get_motw(
             map_data, timestamp + time_offset, league, expiration, default_map)
