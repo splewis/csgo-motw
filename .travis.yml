@@ -3,6 +3,7 @@ sudo: false
 addons:
     apt_packages:
         - lib32stdc++6  # needed for spcomp
+        - python-demjson
 
 before_script:
     # install the google app engine sdk
@@ -30,6 +31,8 @@ before_script:
 script:
     - cd gameserver
     - smbuilder --flags="-E"
+    - cd ../webserver
+    - jsonlint -v data.json
 
 notifications:
     email: false
