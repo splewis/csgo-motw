@@ -1,4 +1,5 @@
 import bisect
+import calendar
 import datetime
 import json
 import time
@@ -36,9 +37,12 @@ def parse_map_data_input(map_dict, time_format):
             try:
                 timestamp = int(str_date)
             except ValueError:
-                time_result = datetime.datetime.strptime(str_date, time_format)
-                timestamp = int(time.mktime(time_result.timetuple()))
-                map_name = map_dict[league][str_date]
+                try:
+                    time_result = datetime.datetime.strptime(str_date, time_format)
+                    timestamp = int(calendar.timegm(time_result.utctimetuple()))
+                    map_name = map_dict[league][str_date]
+                except ValueError:
+                    print 'Failed to parse date {}' % str_date
             league_data.append(Map(timestamp, map_name))
         data[league] = sorted(league_data)
     return data
