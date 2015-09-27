@@ -29,7 +29,7 @@ class MainHandler(webapp2.RequestHandler):
             expiration = motw.DEFAULT_EXPIRATION
 
         try:
-            time_offset = self.request.get('offset', 0)
+            time_offset = int(self.request.get('offset', 0))
         except ValueError:
             time_offset = 0
 
