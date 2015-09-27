@@ -3,7 +3,7 @@ sudo: false
 addons:
     apt_packages:
         - lib32stdc++6  # needed for spcomp
-        - python-demjson
+        - python-demjson  # needed for jsonlint
 
 before_script:
     # install the google app engine sdk
@@ -18,7 +18,7 @@ before_script:
     - python setup.py install --prefix=~/.local
     - cd ..
 
-    # install the sourcemod compiler
+    # install the sourcemod compiler and SteamWorks include
     - wget http://www.gsptalk.com/mirror/sourcemod/sourcemod-1.7.2-linux.tar.gz
     - tar -xzf sourcemod-1.7.2-linux.tar.gz
     - cd addons/sourcemod/scripting/
