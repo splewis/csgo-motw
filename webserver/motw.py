@@ -4,17 +4,9 @@ import json
 import time
 
 # Global constants.
-DATA_FILE = 'data.json'
-TIME_FORMAT = '%Y/%m/%d'
 DEFAULT_MAP = 'de_dust2'
 DEFAULT_EXPIRATION = 14*24*60*60
 DEFAULT_LEAGUE = 'esea'
-
-# Global container for per-map data.
-# This is meant to store league->list of instances
-# of the Map class below.
-map_data = {}
-
 
 # This class really just wraps a tuple(time, name), but gives a comparison
 # function based only on the timestamp difference, which lets us sort
