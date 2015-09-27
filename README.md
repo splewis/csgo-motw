@@ -20,4 +20,7 @@ TODO
 See [webserver/api.md](webserver/api.md).
 TODO
 
-Deployment: ``~/dev/google_appengine/appcfg.py -A csgo-motw update app.yaml``
+Deployment:
+```
+~/dev/google_appengine/appcfg.py -A csgo-motw update app.yaml
+```
