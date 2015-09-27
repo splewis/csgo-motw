@@ -15,7 +15,7 @@ ConVar g_ExpirationCvar;
 ConVar g_LeagueCvar;
 ConVar g_OffsetCvar;
 
-char g_DefaultMap[PLATFORM_MAX_PATH+1];
+char g_CurrentMOTW[PLATFORM_MAX_PATH+1];
 char g_DataFile[PLATFORM_MAX_PATH+1];
 
 public Plugin myinfo = {
@@ -44,9 +44,9 @@ public void OnPluginStart() {
 
     // Read the initial map from the datafile.
     if (!ReadMapFromDatafile()) {
-        char default_map[128];
+        char default_map[PLATFORM_MAX_PATH+1];
         g_DefaultCvar.GetString(default_map, sizeof(default_map));
-        strcopy(g_DefaultMap, sizeof(g_DefaultMap), default_map);
+        strcopy(g_CurrentMOTW, sizeof(g_CurrentMOTW), default_map);
     }
 }
 
@@ -54,7 +54,7 @@ public bool ReadMapFromDatafile() {
     // Read the initial map from the datafile.
     File f = OpenFile(g_DataFile, "r");
     if (f != null) {
-        f.ReadLine(g_DefaultMap, sizeof(g_DefaultMap));
+        f.ReadLine(g_CurrentMOTW, sizeof(g_CurrentMOTW));
         delete f;
         return true;
     }
@@ -68,8 +68,8 @@ public int OnAPIChange(Handle cvar, const char[] oldValue, const char[] newValue
 public void OnConfigsExecuted() {
     UpdateCurrentMap();
     CheckMapChange();
-    if (IsMapValid(g_DefaultMap)) {
-        SetNextMap(g_DefaultMap);
+    if (IsMapValid(g_CurrentMOTW)) {
+        SetNextMap(g_CurrentMOTW);
     }
 }
 
@@ -77,12 +77,8 @@ public void CheckMapChange() {
     if (g_EnabledCvar.IntValue != 0) {
         char mapName[PLATFORM_MAX_PATH+1];
         GetCurrentMap(mapName, sizeof(mapName));
-        if (!StrEqual(mapName, g_DefaultMap, false) && IsMapValid(g_DefaultMap)) {
-            // TODO: there's probably a better way of doing this.
-            // The problem is that OnMapStart is usually called twice before the real start map
-            // first on de_dust, then on the real startup default map, so checking the first
-            // OnMapStart is unreliable.
-            CreateTimer(10.0, Timer_ChangeMap);
+        if (!StrEqual(mapName, g_CurrentMOTW, false) && IsMapValid(g_CurrentMOTW)) {
+            CreateTimer(3.0, Timer_ChangeMap);
         }
     }
 }
@@ -90,8 +86,8 @@ public void CheckMapChange() {
 public Action Timer_ChangeMap(Handle timer) {
     char mapName[PLATFORM_MAX_PATH+1];
     GetCurrentMap(mapName, sizeof(mapName));
-    if (!StrEqual(mapName, g_DefaultMap, false) && IsMapValid(g_DefaultMap)) {
-        ServerCommand("changelevel %s", g_DefaultMap);
+    if (!StrEqual(mapName, g_CurrentMOTW, false) && IsMapValid(g_CurrentMOTW)) {
+        ServerCommand("changelevel %s", g_CurrentMOTW);
     }
 }
 
@@ -140,8 +136,8 @@ public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSucces
     SteamWorks_WriteHTTPResponseBodyToFile(request, g_DataFile);
     ReadMapFromDatafile();
 
-    LogMessage("got map %s", g_DefaultMap);
-    if (IsMapValid(g_DefaultMap)) {
+    LogMessage("got map %s", g_CurrentMOTW);
+    if (IsMapValid(g_CurrentMOTW)) {
         CheckMapChange();
     }
 }
