@@ -2,7 +2,6 @@ import bisect
 import datetime
 import json
 import time
-import webapp2
 
 # Global constants.
 DATA_FILE = 'data.json'
@@ -27,13 +26,15 @@ class Map:
         self.name = name
 
     def __cmp__(self, other):
+        # TODO: this should really be inverted, right now it sorts
+        # in descending order while it should be ascending.
         return other.time - self.time
 
     def __repr__(self):
         return str((self.time, self.name))
 
 
-def parse_map_data_input(map_dict):
+def parse_map_data_input(map_dict, time_format):
     data = {}
     for league in map_dict:
         league_data = []
@@ -43,7 +44,7 @@ def parse_map_data_input(map_dict):
             try:
                 timestamp = int(str_date)
             except ValueError:
-                time_result = datetime.datetime.strptime(str_date, TIME_FORMAT)
+                time_result = datetime.datetime.strptime(str_date, time_format)
                 timestamp = int(time.mktime(time_result.timetuple()))
                 map_name = map_dict[league][str_date]
             league_data.append(Map(timestamp, map_name))
@@ -51,14 +52,13 @@ def parse_map_data_input(map_dict):
     return data
 
 
-def read_map_data(filename):
+def read_map_data(filename, time_format):
     try:
-        x = int(time.time())
         with open(filename) as f:
             text = f.read()
             json_data = json.loads(text)
-            return parse_map_data_input(json_data)
-    except IOError as e:
+            return parse_map_data_input(json_data, time_format)
+    except IOError, ValueError:
         return {DEFAULT_LEAGUE: [Map(0, DEFAULT_MAP)]}
 
 
@@ -77,36 +77,3 @@ def get_motw(map_data, timestamp, league=DEFAULT_LEAGUE,
             return map_data[league][index].name
     except KeyError:
         return default_map
-
-
-class MainHandler(webapp2.RequestHandler):
-
-    def get(self):
-        # Get URL params.
-        try:
-            timestamp = int(self.request.get('timestamp', time.time()))
-        except ValueError:
-            timestamp = int(time.time())
-
-        league = self.request.get('league', DEFAULT_LEAGUE)
-        default_map = self.request.get('default', DEFAULT_MAP)
-
-        try:
-            expiration = int(self.request.get('expiration', DEFAULT_EXPIRATION))
-        except ValueError:
-            expiration = DEFAULT_EXPIRATION
-
-        try:
-            time_offset = self.request.get('offset', 0)
-        except ValueError:
-            time_offset = 0
-
-        result_map = get_motw(
-            map_data, timestamp + time_offset, league, expiration, default_map)
-        self.response.write(result_map)
-
-
-map_data = read_map_data(DATA_FILE)
-app = webapp2.WSGIApplication([
-    ('/', MainHandler),
-], debug=True)

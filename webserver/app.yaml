@@ -6,7 +6,7 @@ threadsafe: true
 
 handlers:
 - url: /
-  script: motw.app
+  script: webapp.app
 
 - url: /data
   static_files: data.json
