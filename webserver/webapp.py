@@ -39,9 +39,13 @@ class MainHandler(webapp2.RequestHandler):
             self.response.write('Illegal value for parameter \"offset\"')
             return
 
-        result_map = motw.get_motw(
-            map_data, timestamp + time_offset, league, expiration, default_map)
-        self.response.write(result_map)
+        if league in map_data:
+            result_map = motw.get_motw(
+                map_data, timestamp + time_offset, league, expiration, default_map)
+            self.response.write(result_map)
+        else:
+            self.error(400)
+            self.response.write('Illegal value for parameter \"league\"')
 
 
 map_data = motw.read_map_data(DATA_FILE, TIME_FORMAT)
