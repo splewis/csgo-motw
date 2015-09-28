@@ -9,6 +9,7 @@
 
 ConVar g_EnabledCvar;
 
+ConVar g_AlwaysForceMOTWCvar;
 ConVar g_ApiUrlCvar;
 ConVar g_DefaultCvar;
 ConVar g_ExpirationCvar;
@@ -21,16 +22,17 @@ char g_DataFile[PLATFORM_MAX_PATH+1];
 public Plugin myinfo = {
     name = "[CS:GO] Map of the week [motw]",
     author = "splewis",
-    description = "Overrides the server's map to always be the current MOTW",
+    description = "Changes the servers map to be the current MOTW",
     version = "1.0.0",
     url = "https://github.com/splewis/csgo-motw"
 };
 
 public void OnPluginStart() {
     BuildPath(Path_SM, g_DataFile, sizeof(g_DataFile), TEMP_DATAFILE);
+    g_AlwaysForceMOTWCvar = CreateConVar("sm_csgo_motw_always_force_motw", "1", "Whether the map is always forced to the MOTW. If set to 0, the server will only change to it when there are 0 connected clients.");
     g_ApiUrlCvar = CreateConVar("sm_csgo_motw_api_url", "http://csgo-motw.appspot.com", "URL the api is hosted at");
-    g_EnabledCvar = CreateConVar("sm_csgo_motw_enabled", "1", "Whether the plugin is enabled");
     g_DefaultCvar = CreateConVar("sm_csgo_motw_default", "de_dust2", "Default backup map");
+    g_EnabledCvar = CreateConVar("sm_csgo_motw_enabled", "1", "Whether the plugin is enabled");
     g_ExpirationCvar = CreateConVar("sm_csgo_motw_expiration", "1209600");
     g_LeagueCvar = CreateConVar("sm_csgo_motw_league", "esea", "League maplist being used, allowed values: \"esea\", \"cevo\"");
     g_OffsetCvar = CreateConVar("sm_csgo_motw_offset", "0", "Offset in seconds added to the timestamp");
@@ -72,6 +74,10 @@ public void CheckMapChange() {
 }
 
 public Action Timer_ChangeMap(Handle timer) {
+    if (g_AlwaysForceMOTWCvar.IntValue == 0 && CountNumPlayers() > 0) {
+        return;
+    }
+
     char mapName[PLATFORM_MAX_PATH+1];
     GetCurrentMap(mapName, sizeof(mapName));
     if (!StrEqual(mapName, g_CurrentMOTW, false) && IsMapValid(g_CurrentMOTW)) {
@@ -154,4 +160,14 @@ public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSucces
 
 public Action Command_ReloadMOTW(int client, int args) {
     UpdateCurrentMap(GetClientSerial(client), GetCmdReplySource());
+}
+
+public int CountNumPlayers() {
+    int count = 0;
+    for (int i = 1; i <= MaxClients; i++) {
+        if (IsClientConnected(i) && IsClientInGame(i) && !IsFakeClient(i)) {
+            count++;
+        }
+    }
+    return count;
 }
