@@ -1,1 +1,8 @@
 Plugin(source='csgo_motw.sp')
+
+Package(name='csgo_motw',
+        plugins=['csgo_motw'],
+        filegroups={
+            '.': ['../LICENSE'],
+        },
+)
