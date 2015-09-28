@@ -153,5 +153,5 @@ public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSucces
 }
 
 public Action Command_ReloadMOTW(int client, int args) {
-    UpdateCurrentMap(client, GetCmdReplySource());
+    UpdateCurrentMap(GetClientSerial(client), GetCmdReplySource());
 }
