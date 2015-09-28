@@ -35,29 +35,50 @@ class TestMOTW(unittest.TestCase):
     def test_parse_map_data_input(self):
         expected = {
             "esea": [
-                motw.Map(1446336000, "de_dust2"),
-                motw.Map(1445731200, "de_cache"),
-                motw.Map(1445126400, "de_inferno"),
-                motw.Map(1444521600, "de_mirage"),
-                motw.Map(1443916800, "de_overpass"),
-                motw.Map(1443312000, "de_cbble"),
-                motw.Map(1442707200, "de_mirage"),
-                motw.Map(1442102400, "de_train"),
-                motw.Map(1441497600, "de_dust2"),
+                (1441497600, "de_dust2"),
+                (1442102400, "de_train"),
+                (1442707200, "de_mirage"),
+                (1443312000, "de_cbble"),
+                (1443916800, "de_overpass"),
+                (1444521600, "de_mirage"),
+                (1445126400, "de_inferno"),
+                (1445731200, "de_cache"),
+                (1446336000, "de_dust2"),
             ],
             "cevo": [
-                motw.Map(1444521600, "de_mirage"),
-                motw.Map(1443916800, "de_dust2"),
-                motw.Map(1443312000, "de_overpass"),
-                motw.Map(1442707200, "de_cache"),
-                motw.Map(1442102400, "de_train"),
-                motw.Map(1441497600, "de_inferno"),
-                motw.Map(1440892800, "de_season"),
-                motw.Map(1440288000, "de_cbble"),
+                (1440288000, "de_cbble"),
+                (1440892800, "de_season"),
+                (1441497600, "de_inferno"),
+                (1442102400, "de_train"),
+                (1442707200, "de_cache"),
+                (1443312000, "de_overpass"),
+                (1443916800, "de_dust2"),
+                (1444521600, "de_mirage"),
             ],
         }
         actual = motw.parse_map_data_input(self.get_map_dict(), '%Y/%m/%d')
         self.assertEqual(expected, motw.parse_map_data_input(self.get_map_dict(), '%Y/%m/%d'))
+
+    def test_find_matching_map(self):
+        map_list = [
+            (0, 'a'),
+            (1, 'b'),
+            (3, 'c'),
+            (6, 'd'),
+            (10, 'e'),
+        ]
+        self.assertEqual(0, motw.find_matching_map(map_list, 0, 'default'))
+        self.assertEqual(1, motw.find_matching_map(map_list, 1, 'default'))
+        self.assertEqual(1, motw.find_matching_map(map_list, 2, 'default'))
+        self.assertEqual(2, motw.find_matching_map(map_list, 3, 'default'))
+        self.assertEqual(2, motw.find_matching_map(map_list, 4, 'default'))
+        self.assertEqual(2, motw.find_matching_map(map_list, 5, 'default'))
+        self.assertEqual(3, motw.find_matching_map(map_list, 6, 'default'))
+        self.assertEqual(3, motw.find_matching_map(map_list, 7, 'default'))
+        self.assertEqual(3, motw.find_matching_map(map_list, 8, 'default'))
+        self.assertEqual(3, motw.find_matching_map(map_list, 9, 'default'))
+        self.assertEqual(4, motw.find_matching_map(map_list, 10, 'default'))
+        self.assertEqual(4, motw.find_matching_map(map_list, 11, 'default'))
 
     def test_get_motw(self):
         map_data = self.get_map_data()
