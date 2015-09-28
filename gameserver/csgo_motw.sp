@@ -58,6 +58,10 @@ public void OnClientDisconnect(int client) {
     g_IsBot[client] = false;
 }
 
+public void OnClientDisconnect_Post(int client) {
+    CheckMapChange();
+}
+
 public bool ReadMapFromDatafile() {
     // Read the initial map from the datafile.
     File f = OpenFile(g_DataFile, "r");
@@ -74,17 +78,13 @@ public void OnConfigsExecuted() {
 }
 
 public void CheckMapChange() {
-    if (g_EnabledCvar.IntValue != 0) {
-        char mapName[PLATFORM_MAX_PATH+1];
-        GetCurrentMap(mapName, sizeof(mapName));
-        if (!StrEqual(mapName, g_CurrentMOTW, false) && IsMapValid(g_CurrentMOTW)) {
-            CreateTimer(3.0, Timer_ChangeMap);
-        }
-    }
+    // Mapchanges are slightly delay to make it easier on clients to avoid
+    // constantly changing maps.
+    CreateTimer(5.0, Timer_ChangeMap);
 }
 
 public Action Timer_ChangeMap(Handle timer) {
-    if (g_AlwaysForceMOTWCvar.IntValue == 0 && CountNumPlayers() > 0) {
+    if (g_EnabledCvar.IntValue == 0  || (g_AlwaysForceMOTWCvar.IntValue == 0 && CountNumPlayers() > 0)) {
         return;
     }
 
