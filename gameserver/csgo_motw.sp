@@ -19,6 +19,8 @@ ConVar g_OffsetCvar;
 char g_CurrentMOTW[PLATFORM_MAX_PATH+1];
 char g_DataFile[PLATFORM_MAX_PATH+1];
 
+bool g_IsBot[MAXPLAYERS+1];
+
 public Plugin myinfo = {
     name = "[CS:GO] Map of the week [motw]",
     author = "splewis",
@@ -46,6 +48,14 @@ public void OnPluginStart() {
         g_DefaultCvar.GetString(default_map, sizeof(default_map));
         strcopy(g_CurrentMOTW, sizeof(g_CurrentMOTW), default_map);
     }
+}
+
+public void OnClientAuthorized(int client, const char[] id) {
+    g_IsBot[client] = StrEqual(id, "BOT", false);
+}
+
+public void OnClientDisconnect(int client) {
+    g_IsBot[client] = false;
 }
 
 public bool ReadMapFromDatafile() {
@@ -108,7 +118,6 @@ static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REP
             return;
         }
 
-        LogMessage("sending api request");
         SteamWorks_SetHTTPCallbacks(request, OnMapRecievedFromAPI);
         SteamWorks_SetHTTPRequestContextValue(request, replyToSerial, replySource);
         SteamWorks_SetHTTPRequestGetOrPostParameter(request, "default", default_map);
@@ -123,8 +132,8 @@ static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REP
 }
 
 // SteamWorks HTTP callback for fetching a workshop collection
-public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSuccessful, EHTTPStatusCode statusCode, int serial, ReplySource replySource) {
-    LogMessage("got api response");
+public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSuccessful,
+                                EHTTPStatusCode statusCode, int serial, ReplySource replySource) {
     if (failure || !requestSuccessful) {
         LogError("API request failed, HTTP status code = %d", statusCode);
         CheckMapChange();
@@ -136,14 +145,13 @@ public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSucces
     if (statusCode == k_EHTTPStatusCode200OK) {
         ReadMapFromDatafile();
         if (serial != 0) {
-            int client = GetClientOfUserId(serial);
+            int client = GetClientFromSerial(serial);
             // Save original reply source to restore later.
             ReplySource r = GetCmdReplySource();
             SetCmdReplySource(replySource);
             ReplyToCommand(client, "Got new MOTW: %s", g_CurrentMOTW);
             SetCmdReplySource(r);
         }
-        LogMessage("got map %s", g_CurrentMOTW);
     } else if (statusCode == k_EHTTPStatusCode400BadRequest) {
         char errMsg[1024];
         File f = OpenFile(g_DataFile, "r");
@@ -160,12 +168,17 @@ public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSucces
 
 public Action Command_ReloadMOTW(int client, int args) {
     UpdateCurrentMap(GetClientSerial(client), GetCmdReplySource());
+    return Plugin_Handled;
 }
 
 public int CountNumPlayers() {
+    // Note: IsFakeClient(i) is not used because it requires IsClientInGame(i)
+    // to be true - which will always return false for human players during
+    // mapchanges. Therefore player counts use authentication first, which
+    // happens earlier. See the OnClientAuthorized forward for managing this.
     int count = 0;
     for (int i = 1; i <= MaxClients; i++) {
-        if (IsClientConnected(i) && IsClientInGame(i) && !IsFakeClient(i)) {
+        if (IsClientConnected(i) && !g_IsBot[i]) {
             count++;
         }
     }
