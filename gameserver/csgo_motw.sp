@@ -1,8 +1,10 @@
 #include <cstrike>
 #include <sourcemod>
-#include <SteamWorks>
-
 #include "include/csgo_motw.inc"
+
+#undef REQUIRE_EXTENSIONS
+#include <SteamWorks>
+#include <system2>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -36,8 +38,8 @@ public Plugin myinfo = {
 public void OnPluginStart() {
     BuildPath(Path_SM, g_DataFile, sizeof(g_DataFile), TEMP_DATAFILE);
     g_AlwaysForceMOTWCvar = CreateConVar("sm_csgo_motw_always_force_motw", "1", "Whether the map is always forced to the MOTW. If set to 0, the server will only change to it when there are 0 connected clients.");
-    g_ApiUrlCvar = CreateConVar("sm_csgo_motw_api_url", "http://csgo-motw.appspot.com", "URL the api is hosted at");
-    g_DefaultCvar = CreateConVar("sm_csgo_motw_default", "de_dust2", "Default backup map");
+    g_ApiUrlCvar = CreateConVar("sm_csgo_motw_api_url", "http://csgo-motw.appspot.com", "URL the api is hosted at. Do not include a trailing /.");
+    g_DefaultCvar = CreateConVar("sm_csgo_motw_default", "de_dust2", "Default backup map. If set to the empty string \"\", the map won't be changed when no matching motw is found.");
     g_EnabledCvar = CreateConVar("sm_csgo_motw_enabled", "1", "Whether the plugin is enabled");
     g_ExpirationCvar = CreateConVar("sm_csgo_motw_expiration", "1209600");
     g_LeagueCvar = CreateConVar("sm_csgo_motw_league", "esea", "League maplist being used, allowed values: \"esea\", \"cevo\"");
@@ -119,6 +121,11 @@ static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REP
     char expiration[128];
     g_ExpirationCvar.GetString(expiration, sizeof(expiration));
 
+    char formattedUrl[1024];
+    Format(formattedUrl, sizeof(formattedUrl),
+           "%s?/default=%s,expiration=%s,league=%s,offset=%s",
+           url, default_map, expiration, league, offset);
+
     if (GetFeatureStatus(FeatureType_Native, "SteamWorks_CreateHTTPRequest") == FeatureStatus_Available) {
         Handle request = SteamWorks_CreateHTTPRequest(k_EHTTPMethodGET, url);
         if (request == INVALID_HANDLE) {
@@ -126,7 +133,7 @@ static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REP
             return;
         }
 
-        SteamWorks_SetHTTPCallbacks(request, OnMapRecievedFromAPI);
+        SteamWorks_SetHTTPCallbacks(request, SteamWorks_OnMapRecieved);
         SteamWorks_SetHTTPRequestContextValue(request, replyToSerial, replySource);
         SteamWorks_SetHTTPRequestGetOrPostParameter(request, "default", default_map);
         SteamWorks_SetHTTPRequestGetOrPostParameter(request, "expiration", expiration);
@@ -134,13 +141,16 @@ static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REP
         SteamWorks_SetHTTPRequestGetOrPostParameter(request, "offset", offset);
         SteamWorks_SendHTTPRequest(request);
 
+    } else if (GetFeatureStatus(FeatureType_Native, "System2_DownloadFile") == FeatureStatus_Available) {
+        System2_DownloadFile(System2_OnMapRecieved, formattedUrl, g_DataFile);
+
     } else {
         LogError("You must have the SteamWorks extension installed to use workshop collections.");
     }
 }
 
 // SteamWorks HTTP callback for fetching a workshop collection
-public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSuccessful,
+public int SteamWorks_OnMapRecieved(Handle request, bool failure, bool requestSuccessful,
                                 EHTTPStatusCode statusCode, int serial, ReplySource replySource) {
     if (failure || !requestSuccessful) {
         LogError("API request failed, HTTP status code = %d", statusCode);
@@ -174,6 +184,19 @@ public int OnMapRecievedFromAPI(Handle request, bool failure, bool requestSucces
     CheckMapChange();
 }
 
+public int System2_OnMapRecieved(bool finished, const char[] error, float dltotal, float dlnow, float ultotal, float ulnow, int serial) {
+    if (finished) {
+        if (StrEqual(error, "")) {
+            ReadMapFromDatafile();
+            int client = GetClientFromSerial(serial);
+            PrintToConsole(client, "Got new MOTW: %s", g_CurrentMOTW);
+        } else {
+            LogError("Failed to get motw data: %s", error);
+        }
+    }
+    CheckMapChange();
+}
+
 public Action Command_ReloadMOTW(int client, int args) {
     UpdateCurrentMap(GetClientSerial(client), GetCmdReplySource());
     return Plugin_Handled;
@@ -194,10 +217,14 @@ public int CountNumPlayers() {
 }
 
 public void SetMOTW(const char[] map) {
-    Call_StartForward(g_OnMapFetched);
-    Call_PushString(map);
-    Call_Finish();
-    strcopy(g_CurrentMOTW, sizeof(g_CurrentMOTW), map);
+    if (IsMapValid(map)) {
+        Call_StartForward(g_OnMapFetched);
+        Call_PushString(map);
+        Call_Finish();
+        strcopy(g_CurrentMOTW, sizeof(g_CurrentMOTW), map);
+    } else {
+        LogError("Failed to set MOTW to map: \"%s\"", map);
+    }
 }
 
 // Natives.
