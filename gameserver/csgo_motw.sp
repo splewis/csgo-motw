@@ -2,6 +2,8 @@
 #include <sourcemod>
 #include <SteamWorks>
 
+#include "include/csgo_motw.inc"
+
 #pragma semicolon 1
 #pragma newdecls required
 
@@ -20,6 +22,8 @@ char g_CurrentMOTW[PLATFORM_MAX_PATH+1];
 char g_DataFile[PLATFORM_MAX_PATH+1];
 
 bool g_IsBot[MAXPLAYERS+1];
+
+Handle g_OnMapFetched = INVALID_HANDLE;
 
 public Plugin myinfo = {
     name = "[CS:GO] Map of the week [motw]",
@@ -40,13 +44,15 @@ public void OnPluginStart() {
     g_OffsetCvar = CreateConVar("sm_csgo_motw_offset", "0", "Offset in seconds added to the timestamp");
     AutoExecConfig();
 
+    g_OnMapFetched = CreateGlobalForward("MOTW_OnMapFetched", ET_Ignore, Param_String);
+
     RegAdminCmd("sm_reloadmotw", Command_ReloadMOTW, ADMFLAG_CHANGEMAP, "Reloads the current MOTW");
 
     // Read the initial map from the datafile.
     if (!ReadMapFromDatafile()) {
         char default_map[PLATFORM_MAX_PATH+1];
         g_DefaultCvar.GetString(default_map, sizeof(default_map));
-        strcopy(g_CurrentMOTW, sizeof(g_CurrentMOTW), default_map);
+        SetMOTW(g_CurrentMOTW);
     }
 }
 
@@ -66,7 +72,9 @@ public bool ReadMapFromDatafile() {
     // Read the initial map from the datafile.
     File f = OpenFile(g_DataFile, "r");
     if (f != null) {
-        f.ReadLine(g_CurrentMOTW, sizeof(g_CurrentMOTW));
+        char tmp[sizeof(g_CurrentMOTW)];
+        f.ReadLine(tmp, sizeof(tmp));
+        SetMOTW(tmp);
         delete f;
         return true;
     }
@@ -183,4 +191,21 @@ public int CountNumPlayers() {
         }
     }
     return count;
+}
+
+public void SetMOTW(const char[] map) {
+    Call_StartForward(g_OnMapFetched);
+    Call_PushString(map);
+    Call_Finish();
+    strcopy(g_CurrentMOTW, sizeof(g_CurrentMOTW), map);
+}
+
+// Natives.
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
+    CreateNative("MOTW_GetMap", Native_GetMap);
+}
+
+public int Native_GetMap(Handle plugin, int numParams) {
+    int length = GetNativeCell(2);
+    SetNativeString(1, g_CurrentMOTW, length);
 }
