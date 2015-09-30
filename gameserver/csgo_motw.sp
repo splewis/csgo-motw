@@ -145,13 +145,13 @@ static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REP
         System2_DownloadFile(System2_OnMapRecieved, formattedUrl, g_DataFile);
 
     } else {
-        LogError("You must have the SteamWorks extension installed to use workshop collections.");
+        LogError("You must have either the SteamWorks or system2 extension installed to use workshop collections.");
     }
 }
 
 // SteamWorks HTTP callback for fetching a workshop collection
 public int SteamWorks_OnMapRecieved(Handle request, bool failure, bool requestSuccessful,
-                                EHTTPStatusCode statusCode, int serial, ReplySource replySource) {
+                                    EHTTPStatusCode statusCode, int serial, ReplySource replySource) {
     if (failure || !requestSuccessful) {
         LogError("API request failed, HTTP status code = %d", statusCode);
         CheckMapChange();
@@ -223,7 +223,7 @@ public void SetMOTW(const char[] map) {
         Call_Finish();
         strcopy(g_CurrentMOTW, sizeof(g_CurrentMOTW), map);
     } else {
-        LogError("Failed to set MOTW to map: \"%s\"", map);
+        LogError("Failed to set MOTW to: \"%s\"", map);
     }
 }
 
