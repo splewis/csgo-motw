@@ -5,7 +5,7 @@ import time
 
 # Global constants.
 DEFAULT_MAP = 'de_dust2'
-DEFAULT_EXPIRATION = 14*24*60*60  # 2 weeks in seconds
+DEFAULT_EXPIRATION = 7*24*60*60  # 1 week in seconds
 DEFAULT_LEAGUE = 'esea'
 
 

@@ -46,7 +46,7 @@ public void OnPluginStart() {
     g_ApiUrlCvar = CreateConVar("sm_csgo_motw_api_url", "http://csgo-motw.appspot.com", "URL the api is hosted at. Do not include a trailing /.");
     g_DefaultCvar = CreateConVar("sm_csgo_motw_default", "de_dust2", "Default backup map. If set to the empty string \"\", the map won't be changed when no matching motw is found.");
     g_EnabledCvar = CreateConVar("sm_csgo_motw_enabled", "1", "Whether the plugin is enabled");
-    g_ExpirationCvar = CreateConVar("sm_csgo_motw_expiration", "1209600", "Time in seconds a map record should be no longer accepted as a current map of the week, after which the default map is used");
+    g_ExpirationCvar = CreateConVar("sm_csgo_motw_expiration", "604800", "Time in seconds a map record should be no longer accepted as a current map of the week, after which the default map is used");
     g_LeagueCvar = CreateConVar("sm_csgo_motw_league", "esea", "League maplist being used, allowed values: \"esea\", \"cevo\"");
     g_OffsetCvar = CreateConVar("sm_csgo_motw_offset", "0", "Offset in seconds added to the timestamp");
     AutoExecConfig(true, "csgo_motw");
