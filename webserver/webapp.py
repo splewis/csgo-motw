@@ -7,8 +7,7 @@ DATA_FILE = 'data.json'
 TIME_FORMAT = '%Y/%m/%d'
 
 # Global container for per-map data.
-# This is meant to store league->list of instances
-# of the Map class below.
+# This is meant to store league->list of (timestamp, map) tuples.
 map_data = {}
 
 class MainHandler(webapp2.RequestHandler):

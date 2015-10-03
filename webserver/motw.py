@@ -1,3 +1,4 @@
+import bisect
 import calendar
 import datetime
 import json
@@ -55,16 +56,8 @@ def find_matching_map(map_list, timestamp, default_map):
     """
     if not map_list:
         return -1
-    # TODO: this should be replaced with a binary search instead of linear scanning
-    # through the map_list..
-    for index, value in enumerate(reversed(map_list)):
-        map_timestamp, map_name = value
-        if timestamp >= value[0]:
-            # The index returned needs to be adjusted since 'index'
-            # refers to index in reversed(map_list), while the return
-            # value should be the index of map_list.
-            return (len(map_list) - 1) - index
-    return -1
+    time_list = [time_map_tuple[0] for time_map_tuple in map_list]
+    return bisect.bisect(time_list, timestamp) - 1
 
 
 def get_motw(map_data, timestamp, league=DEFAULT_LEAGUE,
