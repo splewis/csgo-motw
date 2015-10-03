@@ -49,7 +49,7 @@ public void OnPluginStart() {
     g_ExpirationCvar = CreateConVar("sm_csgo_motw_expiration", "1209600", "Time in seconds a map record should be no longer accepted as a current map of the week, after which the default map is used");
     g_LeagueCvar = CreateConVar("sm_csgo_motw_league", "esea", "League maplist being used, allowed values: \"esea\", \"cevo\"");
     g_OffsetCvar = CreateConVar("sm_csgo_motw_offset", "0", "Offset in seconds added to the timestamp");
-    AutoExecConfig();
+    AutoExecConfig(true, "csgo_motw");
 
     g_OnMapFetched = CreateGlobalForward("MOTW_OnMapFetched", ET_Ignore, Param_String);
 
