@@ -106,7 +106,7 @@ public Action Timer_ChangeMap(Handle timer) {
     char mapName[PLATFORM_MAX_PATH+1];
     GetCurrentMap(mapName, sizeof(mapName));
     if (!StrEqual(mapName, g_CurrentMOTW, false) && IsMapValid(g_CurrentMOTW)) {
-        ServerCommand("changelevel %s", g_CurrentMOTW);
+        ForceChangeLevel(g_CurrentMOTW, "Change to MOTW");
     }
 }
 
@@ -227,6 +227,9 @@ public void SetMOTW(const char[] map) {
         Call_PushString(map);
         Call_Finish();
         strcopy(g_CurrentMOTW, sizeof(g_CurrentMOTW), map);
+        if (g_AlwaysForceMOTWCvar.IntValue != 0) {
+            SetNextMap(map);
+        }
     } else {
         LogError("Failed to set MOTW to: \"%s\"", map);
     }
