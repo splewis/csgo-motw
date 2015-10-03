@@ -20,7 +20,7 @@ timestamp
 
 -----------
 expiration
-- time in seconds a map record should be no longer accepted as a map of the week,
+- time in seconds a map record should be no longer accepted as a current map of the week
   after which the default map will be used
 - default: 1209600 (2 weeks)
 
