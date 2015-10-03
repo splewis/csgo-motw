@@ -9,6 +9,11 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#tryinclude "manual_version.sp"
+#if !defined PLUGIN_VERSION
+#define PLUGIN_VERSION "1.0.0-dev"
+#endif
+
 #define TEMP_DATAFILE "data/csgo_motw.txt"
 
 ConVar g_EnabledCvar;
@@ -31,7 +36,7 @@ public Plugin myinfo = {
     name = "[CS:GO] Map of the week [motw]",
     author = "splewis",
     description = "Changes the servers map to be the current MOTW",
-    version = "1.0.0",
+    version = PLUGIN_VERSION,
     url = "https://github.com/splewis/csgo-motw"
 };
 
