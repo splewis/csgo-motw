@@ -16,11 +16,10 @@
 
 #define TEMP_DATAFILE "data/csgo_motw.txt"
 
-ConVar g_EnabledCvar;
-
 ConVar g_AlwaysForceMOTWCvar;
 ConVar g_ApiUrlCvar;
 ConVar g_DefaultCvar;
+ConVar g_EnabledCvar;
 ConVar g_ExpirationCvar;
 ConVar g_LeagueCvar;
 ConVar g_OffsetCvar;
@@ -238,9 +237,14 @@ public void SetMOTW(const char[] map) {
 // Natives.
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {
     CreateNative("MOTW_GetMap", Native_GetMap);
+    CreateNative("MOTW_Update", Native_Update);
 }
 
 public int Native_GetMap(Handle plugin, int numParams) {
     int length = GetNativeCell(2);
     SetNativeString(1, g_CurrentMOTW, length);
+}
+
+public int Native_Update(Handle plugin, int numParams) {
+    UpdateCurrentMap();
 }
