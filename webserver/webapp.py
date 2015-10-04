@@ -50,4 +50,4 @@ class MainHandler(webapp2.RequestHandler):
 map_data = motw.read_map_data(DATA_FILE, TIME_FORMAT)
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-], debug=True)
+], debug=False)
