@@ -35,25 +35,25 @@ class TestMOTW(unittest.TestCase):
     def test_parse_map_data_input(self):
         expected = {
             "esea": [
-                (1441497600, "de_dust2"),
-                (1442102400, "de_train"),
-                (1442707200, "de_mirage"),
-                (1443312000, "de_cbble"),
-                (1443916800, "de_overpass"),
-                (1444521600, "de_mirage"),
-                (1445126400, "de_inferno"),
-                (1445731200, "de_cache"),
-                (1446336000, "de_dust2"),
+                motw.MapRecord(1441497600, "de_dust2"),
+                motw.MapRecord(1442102400, "de_train"),
+                motw.MapRecord(1442707200, "de_mirage"),
+                motw.MapRecord(1443312000, "de_cbble"),
+                motw.MapRecord(1443916800, "de_overpass"),
+                motw.MapRecord(1444521600, "de_mirage"),
+                motw.MapRecord(1445126400, "de_inferno"),
+                motw.MapRecord(1445731200, "de_cache"),
+                motw.MapRecord(1446336000, "de_dust2"),
             ],
             "cevo": [
-                (1440288000, "de_cbble"),
-                (1440892800, "de_season"),
-                (1441497600, "de_inferno"),
-                (1442102400, "de_train"),
-                (1442707200, "de_cache"),
-                (1443312000, "de_overpass"),
-                (1443916800, "de_dust2"),
-                (1444521600, "de_mirage"),
+                motw.MapRecord(1440288000, "de_cbble"),
+                motw.MapRecord(1440892800, "de_season"),
+                motw.MapRecord(1441497600, "de_inferno"),
+                motw.MapRecord(1442102400, "de_train"),
+                motw.MapRecord(1442707200, "de_cache"),
+                motw.MapRecord(1443312000, "de_overpass"),
+                motw.MapRecord(1443916800, "de_dust2"),
+                motw.MapRecord(1444521600, "de_mirage"),
             ],
         }
         actual = motw.parse_map_data_input(self.get_map_dict(), '%Y/%m/%d')
@@ -61,11 +61,11 @@ class TestMOTW(unittest.TestCase):
 
     def test_find_matching_map(self):
         map_list = [
-            (0, 'a'),
-            (1, 'b'),
-            (3, 'c'),
-            (6, 'd'),
-            (10, 'e'),
+            motw.MapRecord(0, 'a'),
+            motw.MapRecord(1, 'b'),
+            motw.MapRecord(3, 'c'),
+            motw.MapRecord(6, 'd'),
+            motw.MapRecord(10, 'e'),
         ]
         self.assertEqual(0, motw.find_matching_map(map_list, 0, 'default'))
         self.assertEqual(1, motw.find_matching_map(map_list, 1, 'default'))

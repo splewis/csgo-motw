@@ -1,5 +1,6 @@
 import bisect
 import calendar
+import collections
 import datetime
 import json
 import time
@@ -8,6 +9,18 @@ import time
 DEFAULT_MAP = 'de_dust2'
 DEFAULT_EXPIRATION = 7*24*60*60  # 1 week in seconds
 DEFAULT_LEAGUE = 'esea'
+MapRecord = collections.namedtuple('MapRecord', ['timestamp', 'name'])
+
+
+def read_map_data(filename, time_format):
+    """Returns a dictionary of map data information from a file."""
+    try:
+        with open(filename) as f:
+            text = f.read()
+            json_data = json.loads(text)
+            return parse_map_data_input(json_data, time_format)
+    except IOError, ValueError:
+        return {}
 
 
 def parse_map_data_input(map_dict, time_format):
@@ -19,11 +32,12 @@ def parse_map_data_input(map_dict, time_format):
     for league in map_dict:
         league_data = []
         for str_date in map_dict[league]:
-            # If already a timestamp value, use that.
             timestamp = 0
             try:
+                # If already a timestamp value, use that.
                 timestamp = int(str_date)
             except ValueError:
+                # Otherwise, parse it using the time format.
                 try:
                     time_result = datetime.datetime.strptime(
                         str_date, time_format)
@@ -32,31 +46,20 @@ def parse_map_data_input(map_dict, time_format):
                     map_name = map_dict[league][str_date]
                 except ValueError:
                     print 'Failed to parse date {}' % str_date
-            league_data.append((timestamp, map_name))
+            league_data.append(MapRecord(timestamp, map_name))
         data[league] = sorted(league_data)
     return data
 
 
-def read_map_data(filename, time_format):
-    """Returns a dictionary of map data information from a file."""
-    try:
-        with open(filename) as f:
-            text = f.read()
-            json_data = json.loads(text)
-            return parse_map_data_input(json_data, time_format)
-    except IOError, ValueError:
-        return {DEFAULT_LEAGUE: [(0, DEFAULT_MAP)]}
-
-
-def find_matching_map(map_list, timestamp, default_map):
+def find_matching_map(map_record_list, timestamp, default_map):
     """
     Returns the index of the map whose start time is greater than
-    or equal to the input timestamp from the map_list.
+    or equal to the input timestamp from the map_record_list.
     Returns -1 on error.
     """
-    if not map_list:
+    if not map_record_list:
         return -1
-    time_list = [time_map_tuple[0] for time_map_tuple in map_list]
+    time_list = [map_record.timestamp for map_record in map_record_list]
     return bisect.bisect(time_list, timestamp) - 1
 
 
