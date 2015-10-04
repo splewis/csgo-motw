@@ -117,7 +117,7 @@ static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REP
     g_LeagueCvar.GetString(league, sizeof(league));
 
     char default_map[128];
-    g_LeagueCvar.GetString(default_map, sizeof(default_map));
+    g_DefaultCvar.GetString(default_map, sizeof(default_map));
 
     char offset[128];
     g_OffsetCvar.GetString(offset, sizeof(offset));
