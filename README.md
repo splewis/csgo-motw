@@ -3,8 +3,6 @@ csgo-motw
 
 [![Build Status](https://travis-ci.org/splewis/csgo-motw.svg?branch=master)](https://travis-ci.org/splewis/csgo-motw)
 
-**work in progress, not working yet**
-
 This is a simple web API and sourcemod plugin for CS:GO meant to allow
 a server to follow a given league's current map (or its MOTW, map of the week).
 
