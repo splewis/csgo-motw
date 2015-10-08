@@ -166,6 +166,7 @@ public int SteamWorks_OnMapRecieved(Handle request, bool failure, bool requestSu
 
     if (statusCode == k_EHTTPStatusCode200OK) {
         ReadMapFromDatafile();
+        PrintToServer("Got new MOTW: %s", g_CurrentMOTW);
         if (serial != 0) {
             int client = GetClientFromSerial(serial);
             // Save original reply source to restore later.
@@ -192,8 +193,12 @@ public int System2_OnMapRecieved(bool finished, const char[] error, float dltota
     if (finished) {
         if (StrEqual(error, "")) {
             ReadMapFromDatafile();
-            int client = GetClientFromSerial(serial);
-            PrintToConsole(client, "Got new MOTW: %s", g_CurrentMOTW);
+            PrintToServer("Got new MOTW: %s", g_CurrentMOTW);
+            if (serial != 0) {
+                int client = GetClientFromSerial(serial);
+                if (client != 0)
+                    PrintToConsole(client, "Got new MOTW: %s", g_CurrentMOTW);
+            }
         } else {
             LogError("Failed to get motw data: %s", error);
         }
@@ -202,7 +207,8 @@ public int System2_OnMapRecieved(bool finished, const char[] error, float dltota
 }
 
 public Action Command_ReloadMOTW(int client, int args) {
-    UpdateCurrentMap(GetClientSerial(client), GetCmdReplySource());
+    int serial = (client == 0) ? 0 : GetClientSerial(client);
+    UpdateCurrentMap(serial, GetCmdReplySource());
     return Plugin_Handled;
 }
 
