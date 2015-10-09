@@ -34,8 +34,3 @@ Plugin developers can use the [plugin API](gameserver/include/csgo_motw.inc) too
 The webservice runs via webapp2 from the [Google App Engine SDK](https://cloud.google.com/appengine/downloads?hl=en), and is meant to run on Google App Engine.
 
 See [api.md](api.md) for URL parameters to the service. Raw data in JSON form is available at the /data url.
-
-Deployment:
-```
-~/dev/google_appengine/appcfg.py -A csgo-motw update app.yaml
-```
