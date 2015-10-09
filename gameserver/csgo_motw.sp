@@ -202,8 +202,8 @@ public int System2_OnMapRecieved(bool finished, const char[] error, float dltota
         } else {
             LogError("Failed to get motw data: %s", error);
         }
+        CheckMapChange();
     }
-    CheckMapChange();
 }
 
 public Action Command_ReloadMOTW(int client, int args) {
