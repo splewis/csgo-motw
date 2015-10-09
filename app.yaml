@@ -1,6 +1,5 @@
 application: csgo-motw
 runtime: python27
-version: 1
 api_version: 1
 threadsafe: true
 
