@@ -33,8 +33,7 @@ before_script:
     - cd ../../../..
 
 script:
-    - cd gameserver
-    - smbuilder --flags="-E"
+    - smbuilder gameserver --flags="-E"
     - jsonlint -v data.json
     - python motw_test.py
 
