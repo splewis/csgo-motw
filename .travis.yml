@@ -38,6 +38,7 @@ script:
     - cd ../webserver
     - jsonlint -v data.json
     - python motw_test.py
+    - cd ..
 
 deploy:
     provider: gae
