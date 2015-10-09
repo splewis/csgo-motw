@@ -7,7 +7,7 @@ This is a simple web API and sourcemod plugin for CS:GO meant to allow
 a server to follow a given league's current map (or its MOTW, map of the week).
 
 The web service already runs at http://csgo-motw.appspot.com, but you can run
-a version it yourself, if desired. Data is served from [webserver/data.json](webserver/data.json),
+a version it yourself, if desired. Data is served from [data.json](data.json),
 and pull requests to update it are accepted.
 
 ## Game server plugin
@@ -33,7 +33,7 @@ Plugin developers can use the [plugin API](gameserver/include/csgo_motw.inc) too
 ## Web server
 The webservice runs via webapp2 from the [Google App Engine SDK](https://cloud.google.com/appengine/downloads?hl=en), and is meant to run on Google App Engine.
 
-See [webserver/api.md](webserver/api.md) for URL parameters to the service. Raw data in JSON form is available at the /data url.
+See [api.md](api.md) for URL parameters to the service. Raw data in JSON form is available at the /data url.
 
 Deployment:
 ```
