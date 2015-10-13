@@ -11,3 +11,7 @@ handlers:
   static_files: data.json
   upload: data.json
   application_readable: true
+
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
