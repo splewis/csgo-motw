@@ -10,8 +10,8 @@ before_install:
 
 before_script:
     # install the google app engine sdk
-    - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.26.zip
-    - unzip -q google_appengine_1.9.26.zip
+    - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.27.zip
+    - unzip -q google_appengine_1.9.27.zip
     - PATH+=":$PWD/google_appengine"
 
     # install smbuilder
