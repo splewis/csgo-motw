@@ -5,14 +5,9 @@ addons:
         - lib32stdc++6  # needed for spcomp
         - python-demjson  # needed for jsonlint
 
-before_install:
-    - openssl aes-256-cbc -K $encrypted_90f33a494a6c_key -iv $encrypted_90f33a494a6c_iv -in csgo-motw-23c0cb5a72e0.json.enc -out csgo-motw-23c0cb5a72e0.json -d
-
 before_script:
-    # install the google app engine sdk
-    - wget https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.27.zip
-    - unzip -q google_appengine_1.9.27.zip
-    - PATH+=":$PWD/google_appengine"
+    # decrypt app engine credentials
+    - openssl aes-256-cbc -K $encrypted_90f33a494a6c_key -iv $encrypted_90f33a494a6c_iv -in csgo-motw-23c0cb5a72e0.json.enc -out csgo-motw-23c0cb5a72e0.json -d
 
     # install smbuilder
     - git clone https://github.com/splewis/sm-builder
