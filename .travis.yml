@@ -21,8 +21,8 @@ before_script:
 
     # install the sourcemod compiler
     - SMPACKAGE="http://sourcemod.net/latest.php?os=linux&version=${SMVERSION}"
-    - wget $SMPACKAGE
-    - tar xfz $(basename $SMPACKAGE)
+    - wget $SMPACKAGE -O sm.zip
+    - tar xfz sm.zip
     - cd addons/sourcemod/scripting/
     - chmod +x spcomp
     - PATH+=":$PWD"
@@ -33,6 +33,7 @@ before_script:
 
 script:
     - smbuilder gameserver --flags="-E"
+    - rm -rf
     - jsonlint -v data.json
     - python motw_test.py
 
