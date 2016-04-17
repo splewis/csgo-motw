@@ -89,6 +89,13 @@ public bool ReadMapFromDatafile() {
 
 public void OnConfigsExecuted() {
     UpdateCurrentMap();
+
+    if (g_AlwaysForceMOTWCvar.IntValue != 0) {
+        ConVar doVotes = FindConVar("sm_mapvote_endvote");
+        if (doVotes != null) {
+            doVotes.IntValue = 0;
+        }
+    }
 }
 
 public void CheckMapChange() {
