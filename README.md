@@ -11,7 +11,8 @@ a version it yourself, if desired. Data is served from [data.json](data.json),
 and pull requests to update it are accepted.
 
 ## Game server plugin
-To install, you will need either the [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556) or the [System2](https://forums.alliedmods.net/showthread.php?t=146019) extension installed, both are available on both Linux and Windows and are easily installable.
+
+To install, you will need the [SteamWorks](https://forums.alliedmods.net/showthread.php?t=229556) extension installed, which is available on both Linux and Windows and are easily installable.
 
 After that, visit the [releases](https://github.com/splewis/csgo-motw/releases) section and download the release package. Extract the files into the gamesever. Only the plugin binary (``addons/sourcemod/plugins/csgo_motw.smx``) is actually required.
 

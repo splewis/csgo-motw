@@ -4,7 +4,6 @@
 
 #undef REQUIRE_EXTENSIONS
 #include <SteamWorks>
-#include <system2>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -152,11 +151,8 @@ static void UpdateCurrentMap(int replyToSerial=0, ReplySource replySource=SM_REP
         SteamWorks_SetHTTPRequestGetOrPostParameter(request, "offset", offset);
         SteamWorks_SendHTTPRequest(request);
 
-    } else if (GetFeatureStatus(FeatureType_Native, "System2_DownloadFile") == FeatureStatus_Available) {
-        System2_DownloadFile(System2_OnMapRecieved, formattedUrl, g_DataFile);
-
     } else {
-        LogError("You must have either the SteamWorks or system2 extension installed to use workshop collections.");
+        LogError("You must have either the SteamWorks extension installed to get the current motw");
     }
 }
 
@@ -194,23 +190,6 @@ public int SteamWorks_OnMapRecieved(Handle request, bool failure, bool requestSu
     }
 
     CheckMapChange();
-}
-
-public int System2_OnMapRecieved(bool finished, const char[] error, float dltotal, float dlnow, float ultotal, float ulnow, int serial) {
-    if (finished) {
-        if (StrEqual(error, "")) {
-            ReadMapFromDatafile();
-            PrintToServer("Got new MOTW: %s", g_CurrentMOTW);
-            if (serial != 0) {
-                int client = GetClientFromSerial(serial);
-                if (client != 0)
-                    PrintToConsole(client, "Got new MOTW: %s", g_CurrentMOTW);
-            }
-        } else {
-            LogError("Failed to get motw data: %s", error);
-        }
-        CheckMapChange();
-    }
 }
 
 public Action Command_ReloadMOTW(int client, int args) {
